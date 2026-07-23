@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { requireOfficeContext } from "@/lib/auth/office-context";
 import { getCaseDetail, listActiveMembers } from "@/lib/data/cases";
 import { CaseStatusBadge } from "@/components/office/CaseStatusBadge";
-import { CaseDetailTabs } from "@/components/office/CaseDetailTabs";
+import { Tabs } from "@/components/ui/tabs";
 import { CaseDangerActions } from "@/components/office/CaseDangerActions";
 import { ResponsibleSelect } from "@/components/office/ResponsibleSelect";
 import { ActionItemsPanel } from "@/components/office/ActionItemsPanel";
@@ -59,7 +59,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <div className="mt-8">
-        <CaseDetailTabs
+        <Tabs
           tabs={[
             {
               key: "resumo",

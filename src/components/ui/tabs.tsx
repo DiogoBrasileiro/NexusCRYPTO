@@ -3,12 +3,12 @@
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
-export function CaseDetailTabs({ tabs }: { tabs: { key: string; label: string; content: ReactNode }[] }) {
+export function Tabs({ tabs }: { tabs: { key: string; label: string; content: ReactNode }[] }) {
   const [active, setActive] = useState(tabs[0]?.key);
 
   return (
     <div>
-      <div className="flex gap-1 border-b border-nexo-border">
+      <div className="flex flex-wrap gap-1 border-b border-nexo-border">
         {tabs.map((tab) => (
           <button
             key={tab.key}

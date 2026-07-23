@@ -37,6 +37,7 @@ export type OfficeProfileRow = {
   responsible_email: string;
   responsible_role: string | null;
   responsible_phone: string | null;
+  oab_number: string | null;
   user_limit: number;
   created_at: string;
   updated_at: string;

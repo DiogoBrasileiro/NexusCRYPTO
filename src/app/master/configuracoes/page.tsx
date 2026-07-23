@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/session";
 import { UpdateNameForm } from "@/components/account/UpdateNameForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
+import { EndOtherSessionsButton } from "@/components/account/EndOtherSessionsButton";
 
 export const metadata: Metadata = { title: "Configurações — Master — NEXO Jurídico" };
 
@@ -28,6 +29,14 @@ export default async function MasterSettingsPage() {
         <div className="mt-4">
           <ChangePasswordForm dark />
         </div>
+      </section>
+
+      <section className="mt-6 rounded-nexo-card border border-white/10 bg-white/[0.03] p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-white/40">Sessões</h2>
+        <p className="mt-1 mb-4 text-xs text-white/40">
+          Encerra o acesso em todos os outros dispositivos, mantendo esta sessão ativa.
+        </p>
+        <EndOtherSessionsButton dark />
       </section>
     </div>
   );

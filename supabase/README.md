@@ -16,6 +16,8 @@ Migrações SQL ordenadas (rode em sequência num projeto Supabase/Postgres novo
     (`master_list_offices`, `master_overview_stats`, `master_recent_ai_failures`).
     Executam com privilégios do chamador, não `security definer` — continuam
     sujeitas à RLS.
+12. `0012_office_profile_oab.sql` — coluna `oab_number` em `office_profiles`
+    (aba Escritório das Configurações, §73).
 
 ## Como aplicar
 
