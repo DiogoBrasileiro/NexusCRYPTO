@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-inter);
+
+  --color-nexo-black: #0b0b0b;
+  --color-nexo-black-secondary: #121212;
+  --color-nexo-lime: #ccff00;
+  --color-nexo-lime-dark: #9ec600;
+  --color-nexo-panel-bg: #f6f7f9;
+  --color-nexo-white: #ffffff;
+  --color-nexo-text: #17181b;
+  --color-nexo-text-secondary: #747d8c;
+  --color-nexo-border: #e5e8ed;
+  --color-nexo-success: #20bf6b;
+  --color-nexo-warning: #f4a623;
+  --color-nexo-error: #ff5e67;
+  --color-nexo-info: #3b82f6;
+
+  --radius-nexo-card: 16px;
+  --radius-nexo-pill: 999px;
+  --radius-nexo-field: 12px;
+  --radius-nexo-modal: 18px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-nexo-panel-bg);
+  color: var(--color-nexo-text);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  border-color: var(--color-nexo-border);
+}
+
+::selection {
+  background: var(--color-nexo-lime);
+  color: var(--color-nexo-black);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-nexo-lime-dark);
+  outline-offset: 2px;
+}
