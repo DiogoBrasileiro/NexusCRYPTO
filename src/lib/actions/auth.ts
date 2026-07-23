@@ -103,7 +103,7 @@ export async function signInMasterAction(_prevState: ActionState, formData: Form
   return signIn(formData, "master");
 }
 
-export async function signOutAction() {
+async function signOut(redirectTo: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -112,7 +112,15 @@ export async function signOutAction() {
   if (user) {
     await logAuditEvent({ actorId: user.id, eventType: "logout" });
   }
-  redirect("/login");
+  redirect(redirectTo);
+}
+
+export async function signOutAction() {
+  await signOut("/login");
+}
+
+export async function signOutMasterAction() {
+  await signOut("/master/login");
 }
 
 export async function requestPasswordResetAction(

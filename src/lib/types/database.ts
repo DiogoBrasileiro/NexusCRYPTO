@@ -123,6 +123,41 @@ export type AuditLogRow = {
   created_at: string;
 };
 
+export type MasterOfficeListRow = {
+  tenant_id: string;
+  name: string;
+  responsible_name: string;
+  responsible_email: string;
+  status: OfficeStatus;
+  created_at: string;
+  user_count: number;
+  client_count: number;
+  case_count: number;
+  executions_this_month: number;
+  execution_limit: number;
+  last_access_at: string | null;
+  has_ai_failure: boolean;
+};
+
+export type MasterOverviewStatsRow = {
+  active_offices: number;
+  blocked_offices: number;
+  total_users: number;
+  total_clients: number;
+  total_cases: number;
+  executions_this_month: number;
+  ai_failures_this_month: number;
+};
+
+export type MasterRecentAiFailureRow = {
+  id: string;
+  tenant_name: string;
+  case_title: string | null;
+  task_type: string;
+  error_code: string | null;
+  created_at: string;
+};
+
 type NoRelationships = { Relationships: [] };
 
 export type Database = {
@@ -183,6 +218,12 @@ export type Database = {
       tenant_ai_executions_this_month: {
         Args: { p_tenant_id: string };
         Returns: number;
+      };
+      master_list_offices: { Args: Record<string, never>; Returns: MasterOfficeListRow[] };
+      master_overview_stats: { Args: Record<string, never>; Returns: MasterOverviewStatsRow[] };
+      master_recent_ai_failures: {
+        Args: { p_limit?: number };
+        Returns: MasterRecentAiFailureRow[];
       };
     };
   };
