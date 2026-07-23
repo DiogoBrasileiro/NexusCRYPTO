@@ -11,6 +11,7 @@ export * from "./rows/tenancy";
 export * from "./rows/platform";
 export * from "./rows/cases";
 export * from "./rows/documents";
+export * from "./rows/pipeline";
 
 import type {
   AccountScope,
@@ -31,6 +32,12 @@ import type {
 } from "./rows/platform";
 import type { ClientRow, CaseRow, CaseActionItemRow } from "./rows/cases";
 import type { CaseDocumentRow, LetterheadSettingsRow } from "./rows/documents";
+import type {
+  PipelineStageDefinitionRow,
+  CasePipelineConfigRow,
+  PipelineStageRunRow,
+  CaseKnowledgeRow,
+} from "./rows/pipeline";
 
 type NoRelationships = { Relationships: [] };
 type Table<Row, InsertRequired extends keyof Row = never> = {
@@ -63,6 +70,13 @@ export type Database = {
       letterhead_settings: Table<LetterheadSettingsRow, "tenant_id">;
       notifications: Table<NotificationRow, "tenant_id" | "user_id" | "kind" | "title">;
       ai_executions: Table<AiExecutionRow, "tenant_id" | "task_type" | "model">;
+      pipeline_stage_definitions: Table<PipelineStageDefinitionRow>;
+      case_pipeline_configs: Table<CasePipelineConfigRow, "case_id" | "tenant_id" | "depth" | "execution_mode">;
+      pipeline_stage_runs: Table<
+        PipelineStageRunRow,
+        "tenant_id" | "case_id" | "stage_definition_id" | "stage_order" | "status"
+      >;
+      case_knowledge: Table<CaseKnowledgeRow, "case_id" | "tenant_id">;
     };
     Views: Record<string, never>;
     Functions: {
