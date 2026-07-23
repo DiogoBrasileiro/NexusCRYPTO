@@ -12,6 +12,10 @@ Migrações SQL ordenadas (rode em sequência num projeto Supabase/Postgres novo
 8. `0008_row_level_security.sql` — isolamento multi-tenant (RLS).
 9. `0009_seed_pipeline_stage_definitions.sql` — catálogo de etapas (Rápida/Profissional/Completa).
 10. `0010_storage_buckets.sql` — buckets privados `case-documents` e `office-assets`.
+11. `0011_master_reporting_functions.sql` — funções agregadas do Painel Master
+    (`master_list_offices`, `master_overview_stats`, `master_recent_ai_failures`).
+    Executam com privilégios do chamador, não `security definer` — continuam
+    sujeitas à RLS.
 
 ## Como aplicar
 
@@ -26,12 +30,21 @@ Ou via `psql` direto na connection string do projeto, executando os arquivos em 
 
 ## Após aplicar
 
-1. Promover o primeiro usuário master: crie o usuário via Supabase Auth e depois
-   `update users set account_scope = 'master' where id = '<uuid>';`.
-2. Preencher as variáveis de ambiente do app (`.env.local`, ver `.env.example`).
-3. Configurar o provedor de IA em `/master/configuracao-ia` (grava em `global_ai_settings`,
+1. Promover o primeiro usuário master: crie o usuário via Supabase Auth (Dashboard →
+   Authentication, ou `admin.auth.admin.createUser`), insira a linha correspondente em
+   `public.users` com `account_scope = 'master'` e confirme que ela existe (não há
+   trigger automático de espelhamento de `auth.users` para `public.users` — os fluxos
+   do app criam essa linha explicitamente ao convidar um usuário).
+2. Preencher as variáveis de ambiente do app (`.env.local`, ver `.env.example`),
+   incluindo `AI_SETTINGS_ENCRYPTION_KEY` (`openssl rand -base64 32`) — sem ela,
+   salvar a configuração de IA falha.
+3. Configurar o template de e-mail de "Reset Password" / "Invite user" do projeto
+   Supabase (Authentication → Email Templates) para apontar para
+   `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type={{ .Type }}&next=/redefinir-senha`
+   — sem isso, os links de convite/redefinição de senha não completam o fluxo do app.
+4. Configurar o provedor de IA em `/master/configuracao-ia` (grava em `global_ai_settings`,
    a chave nunca é lida pelo navegador — apenas Server Actions com a service role acessam
-   `api_key_ciphertext`).
+   `api_key_ciphertext`, cifrada em repouso com `AI_SETTINGS_ENCRYPTION_KEY`).
 
 ## Isolamento multi-tenant
 

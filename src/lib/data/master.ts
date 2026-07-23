@@ -76,3 +76,50 @@ export async function getOfficeDetail(tenantId: string) {
     recentAudit: recentAudit ?? [],
   };
 }
+
+export async function getGlobalAiSettings() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("global_ai_settings").select("*").eq("id", true).maybeSingle();
+  if (error) throw new Error(`Falha ao carregar configuração de IA: ${error.message}`);
+  return data;
+}
+
+export type AuditLogFilters = {
+  eventType?: string;
+  tenantId?: string;
+  page?: number;
+};
+
+const AUDIT_PAGE_SIZE = 40;
+
+export async function listAuditLogs(filters: AuditLogFilters = {}) {
+  const supabase = await createClient();
+  const page = filters.page && filters.page > 0 ? filters.page : 1;
+  const from = (page - 1) * AUDIT_PAGE_SIZE;
+  const to = from + AUDIT_PAGE_SIZE - 1;
+
+  let query = supabase
+    .from("audit_logs")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (filters.eventType) query = query.eq("event_type", filters.eventType);
+  if (filters.tenantId) query = query.eq("tenant_id", filters.tenantId);
+
+  const { data, error, count } = await query;
+  if (error) throw new Error(`Falha ao carregar auditoria: ${error.message}`);
+
+  return { logs: data ?? [], total: count ?? 0, page, pageSize: AUDIT_PAGE_SIZE };
+}
+
+export async function listDistinctAuditEventTypes() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("audit_logs")
+    .select("event_type")
+    .order("event_type", { ascending: true })
+    .limit(1000);
+  if (error) throw new Error(`Falha ao carregar tipos de evento: ${error.message}`);
+  return Array.from(new Set((data ?? []).map((row) => row.event_type)));
+}
