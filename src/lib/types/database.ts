@@ -12,6 +12,7 @@ export * from "./rows/platform";
 export * from "./rows/cases";
 export * from "./rows/documents";
 export * from "./rows/pipeline";
+export * from "./rows/production";
 
 import type {
   AccountScope,
@@ -38,6 +39,7 @@ import type {
   PipelineStageRunRow,
   CaseKnowledgeRow,
 } from "./rows/pipeline";
+import type { LegalDocumentRow, LegalDocumentVersionRow } from "./rows/production";
 
 type NoRelationships = { Relationships: [] };
 type Table<Row, InsertRequired extends keyof Row = never> = {
@@ -77,6 +79,11 @@ export type Database = {
         "tenant_id" | "case_id" | "stage_definition_id" | "stage_order" | "status"
       >;
       case_knowledge: Table<CaseKnowledgeRow, "case_id" | "tenant_id">;
+      legal_documents: Table<LegalDocumentRow, "tenant_id" | "document_type" | "title">;
+      legal_document_versions: Table<
+        LegalDocumentVersionRow,
+        "tenant_id" | "legal_document_id" | "version_number" | "content"
+      >;
     };
     Views: Record<string, never>;
     Functions: {
