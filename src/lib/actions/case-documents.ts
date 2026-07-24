@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireOfficeContext } from "@/lib/auth/office-context";
 import { logAuditEvent } from "@/lib/audit/log";
+import { validateUploadedFile } from "@/lib/security/file-validation";
 import type { DocumentType } from "@/lib/types/database";
 
 export type DocumentActionState = { error: string | null };
@@ -44,6 +45,9 @@ export async function uploadCaseDocumentAction(
   if (file.size > MAX_FILE_SIZE_BYTES) {
     return { error: "Arquivo maior que o limite de 25 MB." };
   }
+
+  const validation = await validateUploadedFile(file);
+  if (!validation.ok) return { error: validation.error };
 
   const documentTypeRaw = String(formData.get("documentType") ?? "outro");
   const documentType = DOCUMENT_TYPES.includes(documentTypeRaw as DocumentType)

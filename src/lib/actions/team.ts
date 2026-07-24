@@ -126,8 +126,20 @@ export async function toggleMemberActiveAction(userId: string, isActive: boolean
   const context = await requireManager();
   if (userId === context.userId) throw new Error("Você não pode desativar a própria conta.");
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("users").update({ is_active: isActive }).eq("id", userId);
+  // users' RLS only allows self-updates, so this needs the service-role
+  // client — which is why the membership check below isn't optional: it's
+  // the only thing standing between "deactivate my own tenant's member"
+  // and "deactivate any user id on the platform".
+  const admin = createAdminClient();
+  const { data: membership } = await admin
+    .from("memberships")
+    .select("id")
+    .eq("tenant_id", context.tenantId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!membership) throw new Error("Este usuário não pertence ao seu escritório.");
+
+  const { error } = await admin.from("users").update({ is_active: isActive }).eq("id", userId);
   if (error) throw new Error("Não foi possível atualizar o status do usuário.");
 
   await logAuditEvent({

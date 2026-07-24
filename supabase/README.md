@@ -18,6 +18,13 @@ Migrações SQL ordenadas (rode em sequência num projeto Supabase/Postgres novo
     sujeitas à RLS.
 12. `0012_office_profile_oab.sql` — coluna `oab_number` em `office_profiles`
     (aba Escritório das Configurações, §73).
+13. `0013_role_based_write_restrictions.sql` — fecha lacunas de uma revisão
+    de segurança: `audit_logs` passa a ser somente leitura para sessões de
+    escritório (escrita só via service role), `log_audit_event()` e
+    `next_case_code()` (SECURITY DEFINER / callable com `tenant_id`
+    arbitrário) passam a validar o tenant do chamador, e toda tabela
+    operacional passa a negar insert/update/delete para o papel
+    `somente_leitura` (antes tinha CRUD completo, apesar do nome).
 
 ## Como aplicar
 

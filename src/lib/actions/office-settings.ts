@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOfficeContext, canManageOffice } from "@/lib/auth/office-context";
 import { officeProfileSchema, letterheadSchema } from "@/lib/validation/office-settings";
 import { logAuditEvent } from "@/lib/audit/log";
+import { validateUploadedFile } from "@/lib/security/file-validation";
 
 export type SettingsActionState = { error: string | null; success?: boolean };
 
@@ -65,6 +66,9 @@ export async function uploadOfficeLogoAction(
   if (!(file instanceof File) || file.size === 0) return { error: "Selecione uma imagem." };
   if (!file.type.startsWith("image/")) return { error: "Envie um arquivo de imagem." };
   if (file.size > 3 * 1024 * 1024) return { error: "Imagem maior que 3 MB." };
+
+  const validation = await validateUploadedFile(file);
+  if (!validation.ok) return { error: validation.error };
 
   const supabase = await createClient();
   const path = `${context.tenantId}/logo-${Date.now()}.${file.name.split(".").pop() ?? "png"}`;
