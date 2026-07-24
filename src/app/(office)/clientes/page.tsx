@@ -3,20 +3,23 @@ import Link from "next/link";
 import { requireOfficeContext } from "@/lib/auth/office-context";
 import { listClients } from "@/lib/data/clients";
 import { formatDate } from "@/lib/utils/format";
+import { Pagination } from "@/components/ui/pagination";
 
 export const metadata: Metadata = { title: "Clientes — NEXO Jurídico" };
 
-export default async function ClientsPage({ searchParams }: { searchParams: Promise<{ busca?: string }> }) {
-  const { busca } = await searchParams;
+export default async function ClientsPage({ searchParams }: { searchParams: Promise<{ busca?: string; pagina?: string }> }) {
+  const { busca, pagina } = await searchParams;
   const context = await requireOfficeContext();
-  const clients = await listClients(context.tenantId, busca);
+  const page = Number(pagina) > 0 ? Number(pagina) : 1;
+  const { clients, total, pageSize } = await listClients(context.tenantId, busca, page);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-nexo-text">Clientes</h1>
-          <p className="mt-1 text-sm text-nexo-text-secondary">{clients.length} cliente(s) cadastrado(s).</p>
+          <p className="mt-1 text-sm text-nexo-text-secondary">{total} cliente(s) cadastrado(s).</p>
         </div>
         <Link
           href="/clientes/novo"
@@ -72,6 +75,12 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        buildHref={(p) => `/clientes?${new URLSearchParams({ ...(busca ? { busca } : {}), pagina: String(p) })}`}
+      />
     </div>
   );
 }

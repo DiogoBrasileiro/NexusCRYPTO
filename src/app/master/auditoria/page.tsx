@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listAuditLogs, listDistinctAuditEventTypes } from "@/lib/data/master";
 import { formatDateTime } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
+import { Pagination } from "@/components/ui/pagination";
 
 export const metadata: Metadata = { title: "Auditoria — Master — NEXO Jurídico" };
 
@@ -83,31 +84,12 @@ export default async function MasterAuditPage({
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between text-sm text-white/50">
-          <span>
-            Página {page} de {totalPages}
-          </span>
-          <div className="flex gap-2">
-            {page > 1 && (
-              <Link
-                href={`/master/auditoria?${new URLSearchParams({ ...(evento ? { evento } : {}), pagina: String(page - 1) })}`}
-                className="rounded-nexo-pill border border-white/15 px-3.5 py-1.5 hover:bg-white/5"
-              >
-                Anterior
-              </Link>
-            )}
-            {page < totalPages && (
-              <Link
-                href={`/master/auditoria?${new URLSearchParams({ ...(evento ? { evento } : {}), pagina: String(page + 1) })}`}
-                className="rounded-nexo-pill border border-white/15 px-3.5 py-1.5 hover:bg-white/5"
-              >
-                Próxima
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        dark
+        buildHref={(p) => `/master/auditoria?${new URLSearchParams({ ...(evento ? { evento } : {}), pagina: String(p) })}`}
+      />
     </div>
   );
 }

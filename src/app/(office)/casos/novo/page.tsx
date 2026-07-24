@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOfficeContext } from "@/lib/auth/office-context";
-import { listClients } from "@/lib/data/clients";
+import { listClientOptions } from "@/lib/data/clients";
 import { listActiveMembers } from "@/lib/data/cases";
 import { CaseIntakeOriginPicker } from "@/components/office/CaseIntakeOriginPicker";
 import { CaseForm } from "@/components/office/CaseForm";
@@ -44,7 +44,7 @@ export default async function NewCasePage({
   }
 
   const [clients, members] = await Promise.all([
-    listClients(context.tenantId),
+    listClientOptions(context.tenantId),
     listActiveMembers(context.tenantId),
   ]);
 
@@ -57,12 +57,7 @@ export default async function NewCasePage({
       <p className="mt-1 text-sm text-nexo-text-secondary">Origem: {originLabel(origin)}</p>
 
       <div className="mt-8 rounded-nexo-card border border-nexo-border bg-white p-6 sm:p-8">
-        <CaseForm
-          origin={origin}
-          clients={clients.map((c) => ({ id: c.id, label: c.full_name ?? c.company_name ?? "Cliente" }))}
-          members={members}
-          defaultClientId={clienteId}
-        />
+        <CaseForm origin={origin} clients={clients} members={members} defaultClientId={clienteId} />
       </div>
     </div>
   );

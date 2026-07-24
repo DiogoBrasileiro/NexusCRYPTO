@@ -41,15 +41,26 @@ export async function listActiveMembers(tenantId: string) {
   return (users ?? []).map((u) => ({ id: u.id, fullName: u.full_name }));
 }
 
-export type CaseListFilters = { status?: string; search?: string };
+export type CaseListFilters = { status?: string; search?: string; page?: number };
+
+const CASE_PAGE_SIZE = 30;
+
+function sanitizeSearchTerm(term: string): string {
+  return term.replace(/[,()]/g, " ").trim();
+}
 
 export async function listCases(tenantId: string, filters: CaseListFilters = {}) {
   const supabase = await createClient();
+  const page = filters.page && filters.page > 0 ? filters.page : 1;
+  const from = (page - 1) * CASE_PAGE_SIZE;
+  const to = from + CASE_PAGE_SIZE - 1;
+
   let query = supabase
     .from("cases")
-    .select("id, code, title, legal_area, status, depth, client_id, responsible_lawyer_id, updated_at")
+    .select("id, code, title, legal_area, status, depth, client_id, responsible_lawyer_id, updated_at", { count: "exact" })
     .eq("tenant_id", tenantId)
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .range(from, to);
 
   if (filters.status === "arquivados") {
     query = query.not("archived_at", "is", null);
@@ -60,7 +71,13 @@ export async function listCases(tenantId: string, filters: CaseListFilters = {})
     }
   }
 
-  const { data: cases, error } = await query;
+  const term = sanitizeSearchTerm(filters.search ?? "");
+  if (term) {
+    const pattern = `%${term}%`;
+    query = query.or(`code.ilike.${pattern},title.ilike.${pattern},legal_area.ilike.${pattern}`);
+  }
+
+  const { data: cases, error, count } = await query;
   if (error) throw new Error(`Falha ao carregar casos: ${error.message}`);
 
   const clientIds = Array.from(new Set((cases ?? []).map((c) => c.client_id)));
@@ -84,13 +101,7 @@ export async function listCases(tenantId: string, filters: CaseListFilters = {})
     lawyerName: lawyerById.get(c.responsible_lawyer_id) ?? "—",
   }));
 
-  if (!filters.search) return rows;
-  const q = filters.search.trim().toLowerCase();
-  if (!q) return rows;
-
-  return rows.filter((c) =>
-    `${c.code} ${c.title} ${c.clientName} ${c.legal_area}`.toLowerCase().includes(q),
-  );
+  return { cases: rows, total: count ?? 0, page, pageSize: CASE_PAGE_SIZE };
 }
 
 export async function getCaseDetail(tenantId: string, caseId: string) {

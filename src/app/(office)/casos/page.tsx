@@ -5,6 +5,7 @@ import { listCases } from "@/lib/data/cases";
 import { CaseStatusBadge } from "@/components/office/CaseStatusBadge";
 import { formatDate } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
+import { Pagination } from "@/components/ui/pagination";
 
 export const metadata: Metadata = { title: "Casos — NEXO Jurídico" };
 
@@ -21,12 +22,14 @@ const FILTERS: { key: string; label: string }[] = [
 export default async function CasesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; busca?: string }>;
+  searchParams: Promise<{ status?: string; busca?: string; pagina?: string }>;
 }) {
-  const { status, busca } = await searchParams;
+  const { status, busca, pagina } = await searchParams;
   const context = await requireOfficeContext();
   const activeFilter = FILTERS.some((f) => f.key === status) ? (status as string) : "todos";
-  const cases = await listCases(context.tenantId, { status: activeFilter, search: busca });
+  const page = Number(pagina) > 0 ? Number(pagina) : 1;
+  const { cases, total, pageSize } = await listCases(context.tenantId, { status: activeFilter, search: busca, page });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div>
@@ -70,7 +73,7 @@ export default async function CasesPage({
             type="search"
             name="busca"
             defaultValue={busca ?? ""}
-            placeholder="Código, título, cliente ou área"
+            placeholder="Código, título ou área"
             className="h-10 w-full rounded-nexo-field border border-nexo-border bg-white px-3.5 text-sm focus:border-nexo-lime-dark focus:outline-none"
           />
         </form>
@@ -118,6 +121,18 @@ export default async function CasesPage({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        buildHref={(p) =>
+          `/casos?${new URLSearchParams({
+            ...(activeFilter !== "todos" ? { status: activeFilter } : {}),
+            ...(busca ? { busca } : {}),
+            pagina: String(p),
+          })}`
+        }
+      />
     </div>
   );
 }
