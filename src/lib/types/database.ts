@@ -38,6 +38,8 @@ import type {
   CasePipelineConfigRow,
   PipelineStageRunRow,
   CaseKnowledgeRow,
+  StageVersionRow,
+  StageInteractionRow,
 } from "./rows/pipeline";
 import type { LegalDocumentRow, LegalDocumentVersionRow } from "./rows/production";
 
@@ -79,6 +81,8 @@ export type Database = {
         "tenant_id" | "case_id" | "stage_definition_id" | "stage_order" | "status"
       >;
       case_knowledge: Table<CaseKnowledgeRow, "case_id" | "tenant_id">;
+      stage_versions: Table<StageVersionRow, "tenant_id" | "stage_run_id" | "version_number" | "content">;
+      stage_interactions: Table<StageInteractionRow, "tenant_id" | "stage_run_id" | "interaction_type" | "message">;
       legal_documents: Table<LegalDocumentRow, "tenant_id" | "document_type" | "title">;
       legal_document_versions: Table<
         LegalDocumentVersionRow,

@@ -48,6 +48,40 @@ export type PipelineStageRunRow = {
   updated_at: string;
 };
 
+export type StageVersionRow = {
+  id: string;
+  tenant_id: string;
+  stage_run_id: string;
+  version_number: number;
+  author_id: string | null;
+  author_type: string;
+  origin: string;
+  interaction_id: string | null;
+  status: string;
+  content: Record<string, unknown>;
+  content_hash: string | null;
+  created_at: string;
+};
+
+export type StageInteractionRow = {
+  id: string;
+  tenant_id: string;
+  stage_run_id: string;
+  author_id: string | null;
+  interaction_type: string;
+  message: string;
+  ai_conclusion: string | null;
+  ai_technical_analysis: string | null;
+  ai_grounds: string | null;
+  ai_impact_on_stage: string | null;
+  ai_impact_on_other_stages: string | null;
+  ai_recommendation: string | null;
+  resulting_version_id: string | null;
+  lawyer_decision: string | null;
+  lawyer_justification: string | null;
+  created_at: string;
+};
+
 export type CaseKnowledgeRow = {
   case_id: string;
   tenant_id: string;
