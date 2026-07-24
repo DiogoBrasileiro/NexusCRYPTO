@@ -36,7 +36,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   ]);
   if (!detail) notFound();
 
-  const { case: caseRow, client, lawyer, actionItems, stages, documents, auditTrail } = detail;
+  const { case: caseRow, client, lawyer, actionItems, stages, documents, auditTrail, legalDocuments } = detail;
   const clientName = client?.full_name ?? client?.company_name ?? "Cliente";
 
   return (
@@ -128,10 +128,35 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
               label: "Peças",
               content: (
                 <section className="rounded-nexo-card border border-nexo-border bg-white p-6">
-                  <p className="text-sm text-nexo-text-secondary">
-                    Nenhuma peça produzida ainda. A produção de peças jurídicas via Inteligência ainda não está disponível
-                    nesta versão.
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-nexo-text-secondary">
+                      Peças produzidas ({legalDocuments.length})
+                    </h2>
+                    <Link href="/central-inteligencia" className="text-xs font-medium text-nexo-text hover:underline">
+                      Produzir nova peça
+                    </Link>
+                  </div>
+                  {legalDocuments.length === 0 ? (
+                    <p className="mt-4 text-sm text-nexo-text-secondary">Nenhuma peça produzida para este caso ainda.</p>
+                  ) : (
+                    <ul className="mt-4 divide-y divide-nexo-border">
+                      {legalDocuments.map((doc) => (
+                        <li key={doc.id}>
+                          <Link href={`/documentos/${doc.id}`} className="flex items-center justify-between gap-3 py-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-nexo-text">{doc.title}</p>
+                              <p className="text-xs text-nexo-text-secondary">
+                                {doc.document_type} · {formatDate(doc.updated_at)}
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-nexo-pill bg-nexo-panel-bg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-nexo-text-secondary">
+                              {doc.status}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </section>
               ),
             },

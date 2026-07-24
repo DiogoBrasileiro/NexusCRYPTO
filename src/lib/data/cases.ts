@@ -11,6 +11,18 @@ const CASE_STATUSES: CaseStatus[] = [
   "arquivado",
 ];
 
+export async function listCaseOptions(tenantId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("cases")
+    .select("id, code, title")
+    .eq("tenant_id", tenantId)
+    .is("archived_at", null)
+    .order("updated_at", { ascending: false })
+    .limit(200);
+  return (data ?? []).map((c) => ({ id: c.id, label: `${c.code} — ${c.title}` }));
+}
+
 export async function listActiveMembers(tenantId: string) {
   const supabase = await createClient();
   const { data: memberships, error } = await supabase
@@ -87,32 +99,44 @@ export async function getCaseDetail(tenantId: string, caseId: string) {
   const { data: caseRow } = await supabase.from("cases").select("*").eq("tenant_id", tenantId).eq("id", caseId).maybeSingle();
   if (!caseRow) return null;
 
-  const [{ data: client }, { data: lawyer }, { data: actionItems }, { data: stageRuns }, { data: documents }, { data: auditTrail }] =
-    await Promise.all([
-      supabase.from("clients").select("id, full_name, company_name, kind").eq("id", caseRow.client_id).maybeSingle(),
-      supabase.from("users").select("id, full_name").eq("id", caseRow.responsible_lawyer_id).maybeSingle(),
-      supabase
-        .from("case_action_items")
-        .select("*")
-        .eq("case_id", caseId)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("pipeline_stage_runs")
-        .select("id, stage_order, status, stage_definition_id, current_version_id, started_at, completed_at")
-        .eq("case_id", caseId)
-        .order("stage_order", { ascending: true }),
-      supabase
-        .from("case_documents")
-        .select("id, name, document_type, size_bytes, processing_status, created_at, storage_path")
-        .eq("case_id", caseId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("audit_logs")
-        .select("id, event_type, created_at, actor_id")
-        .eq("entity_id", caseId)
-        .order("created_at", { ascending: false })
-        .limit(30),
-    ]);
+  const [
+    { data: client },
+    { data: lawyer },
+    { data: actionItems },
+    { data: stageRuns },
+    { data: documents },
+    { data: auditTrail },
+    { data: legalDocuments },
+  ] = await Promise.all([
+    supabase.from("clients").select("id, full_name, company_name, kind").eq("id", caseRow.client_id).maybeSingle(),
+    supabase.from("users").select("id, full_name").eq("id", caseRow.responsible_lawyer_id).maybeSingle(),
+    supabase
+      .from("case_action_items")
+      .select("*")
+      .eq("case_id", caseId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("pipeline_stage_runs")
+      .select("id, stage_order, status, stage_definition_id, current_version_id, started_at, completed_at")
+      .eq("case_id", caseId)
+      .order("stage_order", { ascending: true }),
+    supabase
+      .from("case_documents")
+      .select("id, name, document_type, size_bytes, processing_status, created_at, storage_path")
+      .eq("case_id", caseId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("audit_logs")
+      .select("id, event_type, created_at, actor_id")
+      .eq("entity_id", caseId)
+      .order("created_at", { ascending: false })
+      .limit(30),
+    supabase
+      .from("legal_documents")
+      .select("id, title, document_type, status, updated_at")
+      .eq("case_id", caseId)
+      .order("updated_at", { ascending: false }),
+  ]);
 
   const stageDefIds = (stageRuns ?? []).map((s) => s.stage_definition_id);
   const { data: stageDefs } =
@@ -160,5 +184,6 @@ export async function getCaseDetail(tenantId: string, caseId: string) {
     stages,
     documents: documents ?? [],
     auditTrail: auditTrail ?? [],
+    legalDocuments: legalDocuments ?? [],
   };
 }
