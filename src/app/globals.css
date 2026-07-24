@@ -46,3 +46,58 @@ body {
   outline: 2px solid var(--color-nexo-lime-dark);
   outline-offset: 2px;
 }
+
+.nexo-editor-content {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-nexo-text);
+}
+
+.nexo-editor-content p {
+  margin: 0 0 1em;
+}
+
+.nexo-editor-content h2,
+.nexo-editor-content h3 {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  margin: 1.4em 0 0.6em;
+  color: var(--color-nexo-text);
+}
+
+.nexo-editor-content h2 {
+  font-size: 1.15em;
+}
+
+.nexo-editor-content h3 {
+  font-size: 1.05em;
+}
+
+.nexo-editor-content ul,
+.nexo-editor-content ol {
+  margin: 0 0 1em;
+  padding-left: 1.5em;
+}
+
+.nexo-editor-content blockquote {
+  border-left: 3px solid var(--color-nexo-border);
+  padding-left: 1em;
+  margin: 0 0 1em;
+  color: var(--color-nexo-text-secondary);
+}
+
+.nexo-editor-content hr {
+  border: none;
+  border-top: 1px dashed var(--color-nexo-border);
+  margin: 2em 0;
+}
+
+.nexo-editor-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--color-nexo-text-secondary);
+  opacity: 0.6;
+  pointer-events: none;
+}
