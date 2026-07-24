@@ -9,7 +9,7 @@ import { CaseDangerActions } from "@/components/office/CaseDangerActions";
 import { ResponsibleSelect } from "@/components/office/ResponsibleSelect";
 import { ActionItemsPanel } from "@/components/office/ActionItemsPanel";
 import { CaseDocumentsPanel } from "@/components/office/CaseDocumentsPanel";
-import { PipelineStageList } from "@/components/office/PipelineStageList";
+import { PipelineStagesPanel } from "@/components/office/pipeline/PipelineStagesPanel";
 import { originLabel } from "@/lib/domain/case-origins";
 import { formatDate, formatDateTime } from "@/lib/utils/format";
 
@@ -108,10 +108,9 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                 <section className="rounded-nexo-card border border-nexo-border bg-white p-6">
                   <p className="mb-4 text-xs text-nexo-text-secondary">
                     Modo {caseRow.execution_mode === "supervisionado" ? "supervisionado" : "automático"} · profundidade {caseRow.depth}.
-                    A execução por especialistas de IA ainda não está disponível nesta versão — as etapas abaixo refletem a
-                    estrutura real do pipeline configurado para este caso.
+                    Cada etapa é executada por um especialista de IA e aguarda sua aprovação antes de liberar a próxima.
                   </p>
-                  <PipelineStageList stages={stages} />
+                  <PipelineStagesPanel caseId={caseRow.id} stages={stages} />
                 </section>
               ),
             },

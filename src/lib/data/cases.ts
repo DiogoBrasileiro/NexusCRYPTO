@@ -98,7 +98,7 @@ export async function getCaseDetail(tenantId: string, caseId: string) {
         .order("created_at", { ascending: true }),
       supabase
         .from("pipeline_stage_runs")
-        .select("id, stage_order, status, stage_definition_id, started_at, completed_at")
+        .select("id, stage_order, status, stage_definition_id, current_version_id, started_at, completed_at")
         .eq("case_id", caseId)
         .order("stage_order", { ascending: true }),
       supabase
@@ -121,10 +121,35 @@ export async function getCaseDetail(tenantId: string, caseId: string) {
       : { data: [] as { id: string; name: string; specialist: string }[] };
   const stageDefById = new Map((stageDefs ?? []).map((d) => [d.id, d]));
 
+  const versionIds = (stageRuns ?? []).map((s) => s.current_version_id).filter((id): id is string => Boolean(id));
+  const { data: versions } =
+    versionIds.length > 0
+      ? await supabase.from("stage_versions").select("id, version_number, content, created_at").in("id", versionIds)
+      : { data: [] as { id: string; version_number: number; content: Record<string, unknown>; created_at: string }[] };
+  const versionById = new Map((versions ?? []).map((v) => [v.id, v]));
+
+  const changesRequestedRunIds = (stageRuns ?? [])
+    .filter((s) => s.status === "changes_requested")
+    .map((s) => s.id);
+  const { data: pendingNotes } =
+    changesRequestedRunIds.length > 0
+      ? await supabase
+          .from("stage_interactions")
+          .select("stage_run_id, message, created_at")
+          .in("stage_run_id", changesRequestedRunIds)
+          .order("created_at", { ascending: false })
+      : { data: [] as { stage_run_id: string; message: string; created_at: string }[] };
+  const latestNoteByStageRun = new Map<string, string>();
+  for (const note of pendingNotes ?? []) {
+    if (!latestNoteByStageRun.has(note.stage_run_id)) latestNoteByStageRun.set(note.stage_run_id, note.message);
+  }
+
   const stages = (stageRuns ?? []).map((run) => ({
     ...run,
     name: stageDefById.get(run.stage_definition_id)?.name ?? "Etapa",
     specialist: stageDefById.get(run.stage_definition_id)?.specialist ?? "",
+    version: run.current_version_id ? (versionById.get(run.current_version_id) ?? null) : null,
+    pendingNote: latestNoteByStageRun.get(run.id) ?? null,
   }));
 
   return {
